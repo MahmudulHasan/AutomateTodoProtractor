@@ -2,9 +2,49 @@ describe('Basic protractor test', function() {
 	var todoTextBox = element(by.id('todotask'));
 	var addNewButton = element(by.id('addtodotask'));
 	var removeTaskButton = element(by.css('button'));
+	var fs = require('fs');
+    var path = require('path');
 
 	// All the list item 
 	var todoList = element.all(by.repeater('x in todoList'));
+
+	
+	afterEach(function() {
+		takeScreenshotWithProtractor();
+	});
+	
+	var takeScreenshotWithProtractor = function() {
+		// Note: this is using Jasmine 2 reporter syntax.
+		jasmine.getEnv().addReporter(new function() {
+			this.specDone = function(result) {
+				// if testcase fails
+				if(result.failedExpectations.length > 0) {
+					// take screenshot after failure
+					browser.takeScreenshot().then(function(png) {
+					 // If screenshot folder does not exist it will create a screenshot folder.         
+			          var dir = "./screenshot/";
+			          try {
+			            fs.mkdirSync(dir);
+			          } catch(e) {
+			              if ( e.code != 'EEXIST' ) 
+			              throw e;
+			          }
+
+			          try {
+			          	// Create your image file if not exists. Image file name is test case name.
+				          var stream = fs.createWriteStream(path.join(dir, result.description + '.png'));
+				           stream.write(new Buffer(png, 'base64'));
+				           stream.end();
+				        } catch(e) {
+				          if ( e.code != 'EEXIST' ) 
+				                throw e;
+				        }
+
+					});
+				}
+			}
+		});
+	};
 
 	it('Page should load properly', function() {
 		// Load demo angular site
@@ -39,5 +79,9 @@ describe('Basic protractor test', function() {
 			removeTaskButton.click();
 			expect(todoList.count()).toEqual(0);
 		});
-	})
+	});
+
+	it('This test case should fail', function() {
+		expect(todoList.count()).toEqual(1);
+	});
 });
