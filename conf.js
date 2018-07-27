@@ -1,12 +1,27 @@
+const SpecReporter = require('jasmine-spec-reporter').SpecReporter;
+const HtmlReporter = require('protractor-beautiful-reporter');
+
+
 exports.config = {
-  seleniumAddress: 'http://localhost:4444/wd/hub',
-  specs: ['./src/basicTest_spec.js'],
+  //specs: ['./src/specs/positive/todoTest_spec.js', './src/specs/negative/todoNegativeTest_spec.js'],
+  suites: {
+    positive: './src/specs/positive/todoTest_spec.js',
+    negative: './src/specs/negative/todoNegativeTest_spec.js'
+  },
   capabilities: {
-        browserName: 'chrome'
+    browserName: 'chrome'
+  },
+  onPrepare: function() {
+    jasmine.getEnv().addReporter(new SpecReporter({
+      spec: {
+        displayStacktrace: false
+      }
+    }));
+    jasmine.getEnv().addReporter(new HtmlReporter({
+         baseDirectory: './screenshots'
+      }).getJasmine2Reporter());
   },
   jasmineNodeOpts: {
-        // If true, display spec names.
-        isVerbose: true,
-        showColors: true
+    defaultTimeoutInterval: 100000
   }
 };
